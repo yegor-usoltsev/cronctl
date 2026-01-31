@@ -13,6 +13,7 @@ import (
 	"github.com/yegor-usoltsev/cronctl/internal/scaffold"
 	"github.com/yegor-usoltsev/cronctl/internal/syncer"
 	"github.com/yegor-usoltsev/cronctl/internal/validate"
+	"github.com/yegor-usoltsev/cronctl/internal/version"
 
 	"gopkg.in/yaml.v3"
 )
@@ -22,6 +23,14 @@ type root struct {
 	Validate validateCmd `cmd:"" help:"Validate job specs."`
 	Build    buildCmd    `cmd:"" help:"Run job build steps with caching."`
 	Sync     syncCmd     `cmd:"" help:"Deploy jobs and manage /etc/cron.d entries."`
+	Version  versionCmd  `cmd:"" help:"Print cronctl version."`
+}
+
+type versionCmd struct{}
+
+func (c *versionCmd) Run() error {
+	fmt.Fprintln(os.Stdout, version.Version)
+	return nil
 }
 
 type initCmd struct {
@@ -140,6 +149,7 @@ func Run(args []string) int {
 		kong.Name("cronctl"),
 		kong.Description("Manage Linux cron jobs from a git repository."),
 		kong.UsageOnError(),
+		kong.BindTo(context.Background(), (*context.Context)(nil)),
 		kong.Writers(os.Stdout, os.Stderr),
 	)
 	if err != nil {
@@ -152,7 +162,7 @@ func Run(args []string) int {
 		return parseExitCode(err)
 	}
 
-	if err := kctx.Run(context.Background()); err != nil {
+	if err := kctx.Run(); err != nil {
 		var verrs validate.Errors
 		if errors.As(err, &verrs) {
 			for _, e := range verrs {

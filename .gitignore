@@ -1,4 +1,5 @@
 cronctl
+dist/
 pages/*.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/go,intellij+all,macos

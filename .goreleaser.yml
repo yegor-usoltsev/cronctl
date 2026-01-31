@@ -18,10 +18,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -s -w
-
-changelog:
-  disable: true
+      - -s -w -X github.com/yegor-usoltsev/cronctl/internal/version.Version=v{{ .Version }}
 
 checksum:
   name_template: checksums.sha256.txt
