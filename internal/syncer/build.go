@@ -86,8 +86,8 @@ func toUint32(v int) (uint32, error) {
 	if v < 0 {
 		return 0, errNegativeID
 	}
-	if v > math.MaxUint32 {
+	if int64(v) > math.MaxUint32 {
 		return 0, errIDTooLarge
 	}
-	return uint32(v), nil
+	return uint32(v), nil //nolint:gosec
 }
