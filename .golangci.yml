@@ -1,0 +1,74 @@
+---
+version: "2"
+
+linters:
+  default: all
+  disable:
+    - cyclop
+    - depguard
+    - funlen
+    - gocognit
+    - gocyclo
+    - gomoddirectives
+    - lll
+    - maintidx
+    - mnd
+    - nlreturn
+    - noinlineerr
+    - nonamedreturns
+    - tagalign
+    - testpackage
+    - tparallel
+    - varnamelen
+    - whitespace
+    - wsl
+    - wsl_v5
+    - loggercheck
+  exclusions:
+    paths:
+      - builtin/
+      - examples/
+      - third_party/
+      - vendor/
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: (.+)_test\.go
+        linters:
+          - dupl
+          - exhaustruct
+          - forcetypeassert
+          - gochecknoglobals
+          - gosec
+          - wrapcheck
+  settings:
+    forbidigo:
+      forbid:
+        - pattern: "^(print(|ln)|fmt\\.Print(|f|ln)|os\\.Exit|slog\\..*)$"
+          msg: Please use the standard log package (log.Printf/log.Fatal/etc.), return errors, or panic instead when appropriate.
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    paths:
+      - builtin/
+      - examples/
+      - third_party/
+      - vendor/
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
+
+run:
+  tests: true
+  timeout: 100s
+
+severity:
+  default: error

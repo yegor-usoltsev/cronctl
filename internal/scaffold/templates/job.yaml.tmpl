@@ -1,0 +1,23 @@
+---
+$schema: "{{ .SchemaURL }}"
+
+name: {{ .JobID }}
+enabled: true
+user: root
+tags: []
+
+env:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+build:
+  enabled: true
+  entrypoint: build.sh
+
+run:
+  entrypoint: run.sh
+
+schedule:
+  - cron: "0 * * * *"
+    args: []
+    env: {}
+    silent: false

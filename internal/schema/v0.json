@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cronctl.usoltsev.xyz/v0.json",
+  "title": "cronctl job spec (v1)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://cronctl.usoltsev.xyz/v0.json",
+      "description": "Schema URL. Required."
+    },
+    "name": {
+      "type": "string",
+      "description": "Must match the job directory name.",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "user": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "env": {
+      "type": "object",
+      "description": "Global environment variables written at the top of /etc/cron.d/cronctl-<id>. Applied to all schedule entries.",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "entrypoint": {
+          "type": "string",
+          "minLength": 1,
+          "default": "build.sh"
+        }
+      },
+      "required": ["enabled"]
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entrypoint": {
+          "type": "string",
+          "minLength": 1,
+          "default": "run.sh"
+        }
+      },
+      "required": ["entrypoint"]
+    },
+    "schedule": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cron": {
+            "type": "string",
+            "description": "5-field cron expression (minute hour day month weekday).",
+            "pattern": "^(\\S+\\s+){4}\\S+$"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "env": {
+            "type": "object",
+            "description": "Environment variables for this specific schedule entry. Merged with global_env.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "silent": {
+            "type": "boolean",
+            "description": "Suppress command output by redirecting to /dev/null. Appends >/dev/null 2>&1 to the command.",
+            "default": false
+          }
+        },
+        "required": ["cron", "args", "env"]
+      }
+    }
+  },
+  "required": [
+    "$schema",
+    "name",
+    "enabled",
+    "user",
+    "tags",
+    "env",
+    "build",
+    "run",
+    "schedule"
+  ]
+}

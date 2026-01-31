@@ -1,0 +1,27 @@
+---
+name: Pages
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - .github/workflows/pages.yml
+      - internal/schema/*.json
+      - pages/**
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/configure-pages@v6
+      - run: cp internal/schema/*.json pages/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages
+      - id: deployment
+        uses: actions/deploy-pages@v4
