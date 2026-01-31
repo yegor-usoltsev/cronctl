@@ -1,9 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cronctl.usoltsev.xyz/v0.json",
-  "title": "cronctl job spec (v1)",
+  "title": "cronctl (v0)",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
     "$schema": {
       "type": "string",
@@ -16,14 +15,17 @@
       "pattern": "^[a-z0-9][a-z0-9-]*$"
     },
     "enabled": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Whether this job is active. If false, cronctl will not install any cron entries for the job."
     },
     "user": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Linux user to run the job as (the USER column in /etc/cron.d)."
     },
     "tags": {
       "type": "array",
+      "description": "Tags used for filtering (e.g. with --tags / --skip-tags).",
       "items": {
         "type": "string",
         "minLength": 1
@@ -41,14 +43,16 @@
     },
     "build": {
       "type": "object",
-      "additionalProperties": false,
+      "description": "Optional build step executed during sync (on the server) before deploying the job payload.",
       "properties": {
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether to run the build step during sync."
         },
         "entrypoint": {
           "type": "string",
           "minLength": 1,
+          "description": "Path to the build script inside the job directory.",
           "default": "build.sh"
         }
       },
@@ -56,11 +60,12 @@
     },
     "run": {
       "type": "object",
-      "additionalProperties": false,
+      "description": "Run configuration. The entrypoint is invoked by cron for each schedule entry.",
       "properties": {
         "entrypoint": {
           "type": "string",
           "minLength": 1,
+          "description": "Path to the run script inside the job directory.",
           "default": "run.sh"
         }
       },
@@ -68,10 +73,10 @@
     },
     "schedule": {
       "type": "array",
+      "description": "List of schedule entries. Each item generates one cron line in /etc/cron.d/cronctl-<id>.",
       "default": [],
       "items": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
           "cron": {
             "type": "string",
@@ -80,6 +85,7 @@
           },
           "args": {
             "type": "array",
+            "description": "Arguments passed to the run entrypoint.",
             "items": {
               "type": "string"
             },
@@ -87,7 +93,7 @@
           },
           "env": {
             "type": "object",
-            "description": "Environment variables for this specific schedule entry. Merged with global_env.",
+            "description": "Environment variables for this specific schedule entry. Merged with top-level env; per-entry values override.",
             "additionalProperties": {
               "type": "string"
             },
