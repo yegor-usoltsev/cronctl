@@ -8,18 +8,10 @@ import (
 )
 
 func main() {
-	os.Exit(run()) //nolint:forbidigo
+	os.Exit(run()) //nolint:forbidigo // main entry point requires os.Exit
 }
 
-func run() (code int) {
+func run() int {
 	log.SetFlags(0)
-	defer func() {
-		if r := recover(); r != nil {
-			log.Printf("panic: %v", r)
-			code = 1
-		}
-	}()
-
-	args := os.Args[1:]
-	return cli.Run(args)
+	return cli.Run(os.Args[1:])
 }

@@ -19,7 +19,7 @@ func ReadHash(path string) (string, bool) {
 	return s, true
 }
 
-func WriteHash(path string, hash string) error {
+func WriteHash(path, hash string) error {
 	if strings.TrimSpace(hash) == "" {
 		return errEmptyHash
 	}

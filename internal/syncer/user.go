@@ -11,7 +11,7 @@ import (
 
 var errUserNotFound = errors.New("user not found")
 
-func resolveJobUser(username string) (uid int, gid int, _ error) {
+func resolveJobUser(username string) (uid, gid int, _ error) {
 	u, err := lookupPasswd(username)
 	if err != nil {
 		return 0, 0, err

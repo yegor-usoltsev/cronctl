@@ -1,6 +1,8 @@
 ---
 version: 2
 
+project_name: cronctl
+
 before:
   hooks:
     - go mod tidy
@@ -20,6 +22,12 @@ builds:
     ldflags:
       - -s -w -X github.com/yegor-usoltsev/cronctl/internal/version.Version=v{{ .Version }}
 
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^Merge "
+
 checksum:
   name_template: checksums.sha256.txt
   algorithm: sha256
@@ -27,4 +35,7 @@ checksum:
 report_sizes: true
 
 release:
+  github:
+    owner: yegor-usoltsev
+    name: cronctl
   name_template: "v{{ .Version }}"

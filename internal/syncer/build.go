@@ -16,7 +16,7 @@ import (
 	"github.com/yegor-usoltsev/cronctl/internal/job"
 )
 
-func runBuildIfNeeded(ctx context.Context, dryRun bool, jobID, jobDir, entrypoint string, force bool, runAsUser bool, uid, gid int) error {
+func runBuildIfNeeded(ctx context.Context, dryRun bool, jobID, jobDir, entrypoint string, force, runAsUser bool, uid, gid int) error {
 	if entrypoint == "" {
 		entrypoint = job.DefaultBuildEntrypoint
 	}
@@ -51,8 +51,8 @@ func runBuildIfNeeded(ctx context.Context, dryRun bool, jobID, jobDir, entrypoin
 		if err != nil {
 			return fmt.Errorf("gid: %w", err)
 		}
-		cred := &syscall.Credential{Uid: uid32, Gid: gid32}      //nolint:exhaustruct
-		cmd.SysProcAttr = &syscall.SysProcAttr{Credential: cred} //nolint:exhaustruct
+		cred := &syscall.Credential{Uid: uid32, Gid: gid32}
+		cmd.SysProcAttr = &syscall.SysProcAttr{Credential: cred}
 	}
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -89,5 +89,5 @@ func toUint32(v int) (uint32, error) {
 	if int64(v) > math.MaxUint32 {
 		return 0, errIDTooLarge
 	}
-	return uint32(v), nil //nolint:gosec
+	return uint32(v), nil
 }

@@ -72,63 +72,9 @@ func Sync(ctx context.Context, jobs []job.Job, opts Options) error {
 			return fmt.Errorf("job %s: resolve user %q: %w", j.ID, j.Spec.User, err)
 		}
 
-		tmpDir, err := stageJobDir(opts.DryRun, opts.TargetDir, j.ID)
-		if err != nil {
-			return fmt.Errorf("job %s: stage: %w", j.ID, err)
+		if err := syncJob(ctx, j, opts, cronPath, targetPath, uid, gid); err != nil {
+			return err
 		}
-		deployed := false
-		if !opts.DryRun {
-			defer func() {
-				if deployed {
-					return
-				}
-				_ = os.RemoveAll(tmpDir)
-			}()
-		}
-		if err := copyJobDir(opts.DryRun, j.Dir, tmpDir); err != nil {
-			return fmt.Errorf("job %s: copy payload: %w", j.ID, err)
-		}
-		if err := carryOverFilehash(opts.DryRun, targetPath, tmpDir); err != nil {
-			return fmt.Errorf("job %s: carry over cache: %w", j.ID, err)
-		}
-		if opts.Chown {
-			if err := chownTree(opts.DryRun, tmpDir, uid, gid); err != nil {
-				return fmt.Errorf("job %s: chown payload: %w", j.ID, err)
-			}
-		}
-
-		if j.Spec.Build.Enabled {
-			if err := runBuildIfNeeded(ctx, opts.DryRun, j.ID, tmpDir, j.Spec.Build.Entrypoint, opts.ForceBuild, opts.RunBuildAsJobUser, uid, gid); err != nil {
-				return fmt.Errorf("job %s: build: %w", j.ID, err)
-			}
-		}
-
-		if err := replaceDir(opts.DryRun, tmpDir, targetPath); err != nil {
-			return fmt.Errorf("job %s: deploy: %w", j.ID, err)
-		}
-		deployed = true
-
-		// Ensure payload ownership (includes build outputs).
-		if opts.Chown {
-			if err := chownTree(opts.DryRun, targetPath, uid, gid); err != nil {
-				return fmt.Errorf("job %s: chown deployed payload: %w", j.ID, err)
-			}
-		}
-
-		// If schedule is empty, desired state is no cron file.
-		if len(j.Spec.Schedule) == 0 {
-			if err := removeFileIfExists(opts.DryRun, cronPath); err != nil {
-				return err
-			}
-			log.Printf("sync: %s: ok (no schedule)", j.ID)
-			continue
-		}
-
-		if err := writeCronFile(opts.DryRun, cronPath, j, targetPath); err != nil {
-			return fmt.Errorf("job %s: write cron: %w", j.ID, err)
-		}
-
-		log.Printf("sync: %s: ok", j.ID)
 	}
 
 	if opts.RemoveOrphans {
@@ -137,5 +83,66 @@ func Sync(ctx context.Context, jobs []job.Job, opts Options) error {
 		}
 	}
 
+	return nil
+}
+
+func syncJob(ctx context.Context, j job.Job, opts Options, cronPath, targetPath string, uid, gid int) error {
+	tmpDir, err := stageJobDir(opts.DryRun, opts.TargetDir, j.ID)
+	if err != nil {
+		return fmt.Errorf("job %s: stage: %w", j.ID, err)
+	}
+	deployed := false
+	if !opts.DryRun {
+		defer func() {
+			if deployed {
+				return
+			}
+			_ = os.RemoveAll(tmpDir)
+		}()
+	}
+	if err := copyJobDir(opts.DryRun, j.Dir, tmpDir); err != nil {
+		return fmt.Errorf("job %s: copy payload: %w", j.ID, err)
+	}
+	if err := carryOverFilehash(opts.DryRun, targetPath, tmpDir); err != nil {
+		return fmt.Errorf("job %s: carry over cache: %w", j.ID, err)
+	}
+	if opts.Chown {
+		if err := chownTree(opts.DryRun, tmpDir, uid, gid); err != nil {
+			return fmt.Errorf("job %s: chown payload: %w", j.ID, err)
+		}
+	}
+
+	if j.Spec.Build.Enabled {
+		if err := runBuildIfNeeded(ctx, opts.DryRun, j.ID, tmpDir, j.Spec.Build.Entrypoint, opts.ForceBuild, opts.RunBuildAsJobUser, uid, gid); err != nil {
+			return fmt.Errorf("job %s: build: %w", j.ID, err)
+		}
+	}
+
+	if err := replaceDir(opts.DryRun, tmpDir, targetPath); err != nil {
+		return fmt.Errorf("job %s: deploy: %w", j.ID, err)
+	}
+	deployed = true
+
+	// Ensure payload ownership (includes build outputs).
+	if opts.Chown {
+		if err := chownTree(opts.DryRun, targetPath, uid, gid); err != nil {
+			return fmt.Errorf("job %s: chown deployed payload: %w", j.ID, err)
+		}
+	}
+
+	// If schedule is empty, desired state is no cron file.
+	if len(j.Spec.Schedule) == 0 {
+		if err := removeFileIfExists(opts.DryRun, cronPath); err != nil {
+			return err
+		}
+		log.Printf("sync: %s: ok (no schedule)", j.ID)
+		return nil
+	}
+
+	if err := writeCronFile(opts.DryRun, cronPath, j, targetPath); err != nil {
+		return fmt.Errorf("job %s: write cron: %w", j.ID, err)
+	}
+
+	log.Printf("sync: %s: ok", j.ID)
 	return nil
 }

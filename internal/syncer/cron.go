@@ -50,7 +50,7 @@ func renderCron(j job.Job, targetPath string) ([]byte, error) {
 			return nil, fmt.Errorf("%w: %q", errInvalidEnvKey, k)
 		}
 		// Global env vars in cron files are written as: KEY=value (no shell escaping needed)
-		buf.WriteString(fmt.Sprintf("%s=%s\n", k, j.Spec.Env[k]))
+		fmt.Fprintf(&buf, "%s=%s\n", k, j.Spec.Env[k])
 	}
 
 	user := strings.TrimSpace(j.Spec.User)

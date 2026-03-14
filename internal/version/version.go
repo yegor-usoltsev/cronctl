@@ -5,4 +5,4 @@ package version
 //	-ldflags "-X github.com/yegor-usoltsev/cronctl/internal/version.Version=v1.2.3"
 //
 // When not set, it defaults to "dev".
-var Version = "dev" //nolint:gochecknoglobals
+var Version = "dev"
