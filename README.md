@@ -1,7 +1,7 @@
 # cronctl
 
 [![Build Status](https://github.com/yegor-usoltsev/cronctl/actions/workflows/ci.yml/badge.svg)](https://github.com/yegor-usoltsev/cronctl/actions)
-[![Codecov](https://codecov.io/github/yegor-usoltsev/cronctl/graph/badge.svg?token=Z1GET86OND)](https://codecov.io/github/yegor-usoltsev/cronctl)
+[![Сodecov](https://codecov.io/github/yegor-usoltsev/cronctl/graph/badge.svg?token=MWBK519US9)](https://codecov.io/github/yegor-usoltsev/cronctl)
 [![GitHub Release](https://img.shields.io/github/v/release/yegor-usoltsev/cronctl?sort=semver)](https://github.com/yegor-usoltsev/cronctl/releases)
 
 GitOps-style management of Linux cron jobs from a git repository.
